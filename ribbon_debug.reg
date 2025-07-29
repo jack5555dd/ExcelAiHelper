@@ -1,0 +1,14 @@
+Windows Registry Editor Version 5.00
+
+; 启用COM加载项调试
+[HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Excel\Options]
+"COMAddInTracing"=dword:00000001
+
+; 增加Excel互操作性日志
+[HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Common\Debug]
+"DefaultTraceLevel"=dword:00000003
+"ComAddInLogLevel"=dword:00000003
+
+; 启用更多的COM加载项调试信息
+[HKEY_CURRENT_USER\Software\Microsoft\Office]
+"COMAddInTraceLevel"=dword:00000003 

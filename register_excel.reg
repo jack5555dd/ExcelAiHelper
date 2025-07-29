@@ -1,5 +1,5 @@
 Windows Registry Editor Version 5.00
-
+ 
 ; 注册COM加载项
 [HKEY_CURRENT_USER\Software\Microsoft\Office\Excel\Addins\MsExcelAddin.Connect]
 "Description"="Microsoft Excel 辅助功能加载项"

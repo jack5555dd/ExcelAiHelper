@@ -1,0 +1,57 @@
+# 如何注册WPS Excel COM加载项
+
+由于COM注册需要管理员权限，请按以下步骤手动注册COM组件：
+
+## 步骤一：以管理员身份打开命令提示符或PowerShell
+
+1. 在Windows搜索框中输入"cmd"或"powershell"
+2. 右键点击"命令提示符"或"Windows PowerShell"
+3. 选择"以管理员身份运行"
+
+## 步骤二：使用RegAsm注册COM组件
+
+在管理员命令提示符或PowerShell窗口中，运行以下命令：
+
+```
+# 对于32位Windows系统
+"%windir%\Microsoft.NET\Framework\v4.0.30319\RegAsm.exe" "完整路径\WpsExcelAddin\bin\Debug\WpsExcelAddin.dll" /codebase
+
+# 对于64位Windows系统
+"%windir%\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe" "J:\testCOM\WpsExcelAddin\bin\Debug\WpsExcelAddin.dll" /codebase
+```
+
+请将"完整路径"替换为项目的实际路径。例如，如果项目在J:\testCOM目录下，则命令应为：
+
+```
+# 对于64位Windows系统
+"%windir%\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe" "J:\testCOM\WpsExcelAddin\bin\Debug\WpsExcelAddin.dll" /codebase
+```
+
+## 步骤三：验证注册是否成功
+
+成功注册后，您会看到类似于以下的消息：
+
+```
+已成功注册类型
+程序集已成功导出到 '路径\WpsExcelAddin.tlb'
+类型已成功注册
+```
+
+## 步骤四：启动WPS Excel测试加载项
+
+启动WPS Excel，查看是否能看到"辅助功能加载项"菜单项。
+
+## 注意事项
+
+1. 确保您的账户有管理员权限
+2. 确保关闭所有正在运行的WPS Excel实例
+3. 如果注册失败，检查路径是否正确，以及是否真的以管理员身份运行
+
+## 卸载步骤
+
+卸载COM组件也需要管理员权限。请运行：
+
+```
+# 对于64位Windows系统
+"%windir%\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe" "完整路径\WpsExcelAddin\bin\Debug\WpsExcelAddin.dll" /unregister
+``` 

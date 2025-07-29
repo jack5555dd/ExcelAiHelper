@@ -3,11 +3,11 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // 有关程序集的一般信息由以下属性控制
-[assembly: AssemblyTitle("CursorExcelAddin")]
-[assembly: AssemblyDescription("Cursor Excel Add-in for Microsoft Excel")]
+[assembly: AssemblyTitle("AIHelper")]
+[assembly: AssemblyDescription("AI Helper Add-in for Microsoft Excel")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Cursor Team")]
-[assembly: AssemblyProduct("CursorExcelAddin")]
+[assembly: AssemblyCompany("AI Helper Team")]
+[assembly: AssemblyProduct("AIHelper")]
 [assembly: AssemblyCopyright("Copyright © 2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(true)]
 
 // 如果此项目向 COM 公开，则下列 GUID 用于类型库的 ID
-[assembly: Guid("AADF518D-11A0-4878-89E0-72E854CECEFE")]
+[assembly: Guid("A2F47820-C9D3-4C8F-B3D5-78A982F89E31")]
 
 // 程序集的版本信息由下列四个值组成: 
 //
