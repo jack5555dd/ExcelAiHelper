@@ -1,87 +1,89 @@
 @echo off
-echo ===================================================
-echo Complete Cleanup and Reinstallation of AIHelper Add-in
-echo ===================================================
+echo ==================================================
+echo AIHelper Excel加载项安装程序 - 任务面板版
+echo ==================================================
 
-rem Check for admin rights
+rem 检查管理员权限
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
 if '%errorlevel%' NEQ '0' (
-    echo ERROR: Please run this script as Administrator!
-    echo Right-click on this file and select "Run as administrator".
+    echo 错误: 请以管理员身份运行此脚本！
+    echo 请右键点击此文件，选择"以管理员身份运行"。
     pause
     exit /b 1
 )
 
-echo [Step 1/6] Closing Excel (if running)...
-taskkill /f /im excel.exe >nul 2>&1
-echo Excel closed (or was not running).
-
-echo [Step 2/6] Unregistering any existing COM components...
+rem 获取当前目录
 set "CURRENT_DIR=%~dp0"
-set "DLL_PATH=%CURRENT_DIR%bin\Debug\AIHelper.dll"
-
-if exist "%DLL_PATH%" (
-    "%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\regasm.exe" "%DLL_PATH%" /unregister /silent
-    "%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\regasm.exe" "%DLL_PATH%" /unregister /silent
-    echo Existing COM component unregistered.
-)
-
-echo [Step 3/6] Removing registry entries...
-reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\AIHelper.Connect" /f >nul 2>&1
-reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\CursorExcelAddin.Connect" /f >nul 2>&1
-reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\MsExcelAddin.Connect" /f >nul 2>&1
-echo Registry entries removed.
-
-echo [Step 4/6] Cleaning build artifacts...
-if exist "bin" rmdir /S /Q bin
-if exist "obj" rmdir /S /Q obj
-echo Build artifacts cleaned.
-
-echo [Step 5/6] Rebuilding project...
-"C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe" MsExcelAddin.csproj /p:Configuration=Debug /p:Platform="AnyCPU" /t:Rebuild
-
-if %errorlevel% neq 0 (
-    echo Build failed! Please check compilation errors.
-    pause
-    exit /b 1
-)
-echo Project rebuilt successfully.
-
-echo [Step 6/6] Registering COM component and add-in...
 set "DLL_PATH=%CURRENT_DIR%bin\Debug\AIHelper.dll"
 set "CONFIG_PATH=%CURRENT_DIR%bin\Debug\AIHelper.config"
 
-rem Create default config
+echo [步骤 1/6] 关闭Excel（如果正在运行）...
+taskkill /f /im excel.exe >nul 2>&1
+echo Excel已关闭（或未运行）。
+
+echo [步骤 2/6] 卸载现有COM组件...
+if exist "%DLL_PATH%" (
+    "%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\regasm.exe" "%DLL_PATH%" /unregister /silent
+    "%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\regasm.exe" "%DLL_PATH%" /unregister /silent
+    echo 现有COM组件已卸载。
+)
+
+echo [步骤 3/6] 移除注册表项...
+reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\AIHelper.Connect" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\CursorExcelAddin.Connect" /f >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\MsExcelAddin.Connect" /f >nul 2>&1
+echo 注册表项已移除。
+
+echo [步骤 4/6] 清理构建产物...
+if exist "bin" rmdir /S /Q bin
+if exist "obj" rmdir /S /Q obj
+echo 构建产物已清理。
+
+echo [步骤 5/6] 重新构建项目...
+"C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe" MsExcelAddin.csproj /p:Configuration=Debug /p:Platform="AnyCPU" /t:Rebuild
+
+if %errorlevel% neq 0 (
+    echo 构建失败！请检查编译错误。
+    pause
+    exit /b 1
+)
+echo 项目重新构建成功。
+
+echo [步骤 6/6] 注册COM组件和加载项...
+set "DLL_PATH=%CURRENT_DIR%bin\Debug\AIHelper.dll"
+set "CONFIG_PATH=%CURRENT_DIR%bin\Debug\AIHelper.config"
+
+rem 创建默认配置
 echo ApiKey=> "%CONFIG_PATH%"
 echo ApiEndpoint=https://api.openai.com/v1/chat/completions>> "%CONFIG_PATH%"
 echo ApiModel=gpt-3.5-turbo>> "%CONFIG_PATH%"
 
-rem Register with RegAsm
+rem 使用RegAsm注册
+echo 使用RegAsm注册组件...
 "%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\regasm.exe" "%DLL_PATH%" /codebase
-if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-    "%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\regasm.exe" "%DLL_PATH%" /codebase
-)
+"%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\regasm.exe" "%DLL_PATH%" /codebase
 
-rem Add registry entries
+rem 添加注册表项
+echo 添加注册表项...
 reg add "HKCU\Software\Microsoft\Office\Excel\Addins\AIHelper.Connect" /v Description /t REG_SZ /d "AI Helper Add-in for Microsoft Excel" /f
 reg add "HKCU\Software\Microsoft\Office\Excel\Addins\AIHelper.Connect" /v FriendlyName /t REG_SZ /d "AIHelper Add-in" /f
 reg add "HKCU\Software\Microsoft\Office\Excel\Addins\AIHelper.Connect" /v LoadBehavior /t REG_DWORD /d 3 /f
-echo COM component registered and registry entries added.
+echo COM组件已注册并添加注册表项。
 
 echo.
-echo ===================================================
-echo Installation complete!
-echo ===================================================
+echo ==================================================
+echo 安装完成！
+echo ==================================================
 echo.
-echo Important steps:
-echo 1. Start Microsoft Excel
-echo 2. Look for the "AIHelper" tab in the ribbon
-echo 3. Click "Show AI Assistant" to display the AI panel
-echo 4. Configure your API key in "API Settings"
+echo 重要说明:
+echo 1. 启动Microsoft Excel
+echo 2. 点击菜单栏中的"AIHelper"菜单
+echo 3. 点击"显示AI助手"以显示右侧任务面板
+echo 4. 点击"API设置"配置您的API密钥
 echo.
-echo If the add-in does not load correctly:
-echo - Check Excel's Trust Center settings
-echo - Ensure all COM add-ins are enabled
-echo - If needed, run this script again
+echo 如果加载项未正确加载:
+echo - 检查Excel的信任中心设置
+echo - 确保已启用所有COM加载项
+echo - 如有需要，再次运行此脚本
 echo.
 pause 

@@ -1,10 +1,10 @@
 @echo off
-echo 正在编译MsExcelAddin...
+echo Building AIHelper Add-in...
 "C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe" MsExcelAddin.csproj /p:Configuration=Debug /p:Platform="AnyCPU" /t:Rebuild
 if %errorlevel% neq 0 (
-  echo 编译失败！
+  echo Build failed!
   pause
   exit /b 1
 )
-echo 编译成功！
+echo Build successful!
 pause 
