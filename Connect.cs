@@ -14,11 +14,30 @@ using System.Collections.Generic;
 
 namespace AIHelper
 {
+    /// <summary>
+    /// COM事件接口，用于Excel菜单回调
+    /// </summary>
+    [ComVisible(true)]
+    [Guid("90E26620-8A01-4C8A-B3D1-83A977E12E41")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
+    public interface IConnect
+    {
+        [DispId(1)]
+        void OnShowAI(IRibbonControl control);
+        
+        [DispId(2)]
+        void OnSettings(IRibbonControl control);
+        
+        [DispId(3)]
+        void OnAbout(IRibbonControl control);
+    }
+
     [ComVisible(true)]
     [Guid("A2F47820-C9D3-4C8F-B3D5-78A982F89E31")]
     [ProgId("AIHelper.Connect")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class Connect : IDTExtensibility2
+    [ComSourceInterfaces(typeof(IConnect))]
+    public class Connect : IDTExtensibility2, IConnect
     {
         // Excel 应用程序实例
         private Excel.Application excelApp;
@@ -287,21 +306,21 @@ namespace AIHelper
                 showAiButton.Caption = "Show AI Assistant";
                 showAiButton.Style = MsoButtonStyle.msoButtonIconAndCaption;
                 showAiButton.FaceId = 59; // Excel内置图标
-                showAiButton.OnAction = "!<AIHelper.Connect.OnShowAI>";
+                showAiButton.OnAction = "OnShowAI";
                 
                 CommandBarButton settingsButton = (CommandBarButton)aiMenu.Controls.Add(
                     1, missing, missing, missing, true);
                 settingsButton.Caption = "API Settings";
                 settingsButton.Style = MsoButtonStyle.msoButtonIconAndCaption;
                 settingsButton.FaceId = 23; // 设置图标
-                settingsButton.OnAction = "!<AIHelper.Connect.OnSettings>";
+                settingsButton.OnAction = "OnSettings";
                 
                 CommandBarButton aboutButton = (CommandBarButton)aiMenu.Controls.Add(
                     1, missing, missing, missing, true);
                 aboutButton.Caption = "About";
                 aboutButton.Style = MsoButtonStyle.msoButtonIconAndCaption;
                 aboutButton.FaceId = 487; // 信息图标
-                aboutButton.OnAction = "!<AIHelper.Connect.OnAbout>";
+                aboutButton.OnAction = "OnAbout";
                 
                 // 显示菜单
                 aiMenu.Visible = true;
@@ -316,66 +335,45 @@ namespace AIHelper
             }
         }
         
-        // 使用公共静态方法处理菜单点击
-        public static void OnShowAI()
+        // COM可见的实例方法处理菜单点击
+        public void OnShowAI(IRibbonControl control)
         {
             try
             {
-                WriteToLog("OnShowAI method called");
-                if (instance != null)
-                {
-                    instance.ShowAiPanel();
-                }
-                else
-                {
-                    WriteToLog("Error: instance is null, cannot call ShowAiPanel");
-                }
+                WriteLog("OnShowAI method called");
+                ShowAiPanel();
             }
             catch (Exception ex)
             {
-                WriteToLog("OnShowAI error: " + ex.Message + "\r\n" + ex.StackTrace);
+                WriteLog("OnShowAI error: " + ex.Message + "\r\n" + ex.StackTrace);
                 MessageBox.Show("Failed to show AI Assistant panel: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         
-        public static void OnSettings()
+        public void OnSettings(IRibbonControl control)
         {
             try
             {
-                WriteToLog("OnSettings 方法被调用");
-                if (instance != null)
-                {
-                    instance.ShowSettings();
-                }
-                else
-                {
-                    WriteToLog("错误: instance为空，无法调用ShowSettings");
-                }
+                WriteLog("OnSettings 方法被调用");
+                ShowSettings();
             }
             catch (Exception ex)
             {
-                WriteToLog("OnSettings 错误: " + ex.Message + "\r\n" + ex.StackTrace);
+                WriteLog("OnSettings 错误: " + ex.Message + "\r\n" + ex.StackTrace);
                 MessageBox.Show("显示设置对话框失败: " + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         
-        public static void OnAbout()
+        public void OnAbout(IRibbonControl control)
         {
             try
             {
-                WriteToLog("OnAbout 方法被调用");
-                if (instance != null)
-                {
-                    instance.ShowAbout();
-                }
-                else
-                {
-                    WriteToLog("错误: instance为空，无法调用ShowAbout");
-                }
+                WriteLog("OnAbout 方法被调用");
+                ShowAbout();
             }
             catch (Exception ex)
             {
-                WriteToLog("OnAbout 错误: " + ex.Message + "\r\n" + ex.StackTrace);
+                WriteLog("OnAbout 错误: " + ex.Message + "\r\n" + ex.StackTrace);
                 MessageBox.Show("显示关于对话框失败: " + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -386,7 +384,6 @@ namespace AIHelper
             try
             {
                 WriteLog("ShowAiPanel called");
-                MessageBox.Show("AI Assistant panel function triggered", "AI Helper", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 
                 // 如果已有面板，则切换显示/隐藏
                 if (taskPane != null)
@@ -409,9 +406,58 @@ namespace AIHelper
                     return;
                 }
                 
-                // TO-DO: 实现实际的任务面板
-                WriteLog("Task pane functionality not fully implemented yet");
-                MessageBox.Show("AI Assistant panel feature is under development, coming soon!", "AI Helper", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // 创建任务面板
+                try
+                {
+                    // 创建聊天面板控件
+                    chatPanel = new ChatPanel(this);
+                    
+                    // 获取Excel的CustomTaskPanes集合
+                    object customTaskPanes = excelApp.GetType().InvokeMember(
+                        "CustomTaskPanes", 
+                        BindingFlags.GetProperty, 
+                        null, 
+                        excelApp, 
+                        null);
+                    
+                    if (customTaskPanes != null)
+                    {
+                        // 添加自定义任务面板
+                        taskPane = customTaskPanes.GetType().InvokeMember(
+                            "Add",
+                            BindingFlags.InvokeMethod,
+                            null,
+                            customTaskPanes,
+                            new object[] { chatPanel, "AI Helper", excelApp.ActiveWindow });
+                        
+                        // 设置任务面板属性
+                        taskPane.GetType().InvokeMember(
+                            "Visible", 
+                            BindingFlags.SetProperty, 
+                            null, 
+                            taskPane, 
+                            new object[] { true });
+                            
+                        taskPane.GetType().InvokeMember(
+                            "Width", 
+                            BindingFlags.SetProperty, 
+                            null, 
+                            taskPane, 
+                            new object[] { 300 });
+                            
+                        WriteLog("AI Assistant task pane created successfully");
+                    }
+                    else
+                    {
+                        WriteLog("Failed to get CustomTaskPanes collection");
+                        MessageBox.Show("无法创建任务面板，请确保Excel版本支持自定义任务面板", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    WriteLog("Create task pane error: " + ex.Message + "\r\n" + ex.StackTrace);
+                    MessageBox.Show("创建任务面板失败: " + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {

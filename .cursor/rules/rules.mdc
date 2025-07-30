@@ -1,0 +1,8 @@
+---
+alwaysApply: true
+---
+
+
+每次生成完了后生成一个对话结果md文档；
+每次开始聊天要读取上次对话结果md文档；
+文档保存在J:\testCOM\docs\chatdoc
