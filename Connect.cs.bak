@@ -306,21 +306,21 @@ namespace AIHelper
                 showAiButton.Caption = "Show AI Assistant";
                 showAiButton.Style = MsoButtonStyle.msoButtonIconAndCaption;
                 showAiButton.FaceId = 59; // Excel内置图标
-                showAiButton.OnAction = "!<AIHelper.Connect.OnShowAI>";
+                showAiButton.OnAction = "OnShowAI";
                 
                 CommandBarButton settingsButton = (CommandBarButton)aiMenu.Controls.Add(
                     1, missing, missing, missing, true);
                 settingsButton.Caption = "API Settings";
                 settingsButton.Style = MsoButtonStyle.msoButtonIconAndCaption;
                 settingsButton.FaceId = 23; // 设置图标
-                settingsButton.OnAction = "!<AIHelper.Connect.OnSettings>";
+                settingsButton.OnAction = "OnSettings";
                 
                 CommandBarButton aboutButton = (CommandBarButton)aiMenu.Controls.Add(
                     1, missing, missing, missing, true);
                 aboutButton.Caption = "About";
                 aboutButton.Style = MsoButtonStyle.msoButtonIconAndCaption;
                 aboutButton.FaceId = 487; // 信息图标
-                aboutButton.OnAction = "!<AIHelper.Connect.OnAbout>";
+                aboutButton.OnAction = "OnAbout";
                 
                 // 显示菜单
                 aiMenu.Visible = true;

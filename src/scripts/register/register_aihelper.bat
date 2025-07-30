@@ -10,9 +10,8 @@ if '%errorlevel%' NEQ '0' (
     exit /b 1
 )
 
-rem 获取当前目录
-set "CURRENT_DIR=%~dp0"
-set "DLL_PATH=%CURRENT_DIR%bin\Debug\AIHelper.dll"
+rem 直接设置绝对路径
+set "DLL_PATH=J:\testCOM\bin\Debug\AIHelper.dll"
 
 rem 检查DLL文件是否存在
 if not exist "%DLL_PATH%" (
@@ -24,6 +23,15 @@ if not exist "%DLL_PATH%" (
 
 echo DLL Path: %DLL_PATH%
 
+rem 检查DLL路径
+if exist "%DLL_PATH%" (
+    echo DLL file exists at: %DLL_PATH%
+) else (
+    echo ERROR: DLL file not found at: %DLL_PATH%
+    pause
+    exit /b 1
+)
+
 rem 先尝试卸载任何已存在的注册
 echo Unregistering any existing installations...
 reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\AIHelper.Connect" /f >nul 2>&1
@@ -33,8 +41,13 @@ reg delete "HKCU\Software\Microsoft\Office\Excel\Addins\CursorExcelAddin.Connect
 
 rem 注册DLL (32位和64位)
 echo Registering COM component...
+echo Running 32-bit registration...
 "%SystemRoot%\Microsoft.NET\Framework\v4.0.30319\regasm.exe" "%DLL_PATH%" /codebase /tlb
+echo 32-bit registration exit code: %errorlevel%
+
+echo Running 64-bit registration...
 "%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\regasm.exe" "%DLL_PATH%" /codebase /tlb
+echo 64-bit registration exit code: %errorlevel%
 
 rem 导入注册表项
 echo Adding registry entries...
